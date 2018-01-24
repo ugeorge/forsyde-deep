@@ -32,7 +32,11 @@ module Language.Haskell.TH.TypeLib
   type2TypeRep)
  where
 
-import Data.Typeable.Internal
+-- import Data.Typeable.Internal
+-- import Data.Typeable 
+import Type.Reflection
+  
+
 import Data.Dynamic
 import Language.Haskell.TH (Type(..), Cxt, TyVarBndr(..), pprint, mkName, nameModule, nameBase)
 import Text.Regex.Posix ((=~))
@@ -51,6 +55,8 @@ import Foreign (Ptr, FunPtr, StablePtr, ForeignPtr)
 --                          IOException)
 import Data.Ratio (Ratio)
 import Control.Concurrent.MVar (MVar)
+
+type TypeRep = SomeTypeRep
 
 -----------
 -- Context

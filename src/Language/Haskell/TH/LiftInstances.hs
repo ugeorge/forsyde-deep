@@ -22,6 +22,11 @@ import Language.Haskell.TH.Lift (deriveLift)
 
 import Language.Haskell.TH.Syntax
  (Guard,
+#if __GLASGOW_HASKELL__ >= 802
+  DerivStrategy,
+  DerivClause,
+  PatSynArgs,
+  PatSynDir,
 #if __GLASGOW_HASKELL__ >= 800
   -- Strict was replaced and became a synonym for Bang in GHC 8.0.1
   Bang,
@@ -35,6 +40,8 @@ import Language.Haskell.TH.Syntax
 #else
   -- This is only for backwards compatibility with ghc 7.10.
   Strict,
+#endif
+#else  
 #endif
   Callconv,
   Safety,
@@ -73,9 +80,14 @@ import Language.Haskell.TH.Syntax
 
 $(mapM deriveLift 
       [''Guard,
+#if __GLASGOW_HASKELL__ >= 802
+       ''DerivClause,
+       ''DerivStrategy,
+       ''PatSynArgs,
+       ''PatSynDir,
 #if __GLASGOW_HASKELL__ >= 800
-       -- Strict was replaced and became a synonym (for which we don't need any
-       -- lift instances) for Bang in GHC 8.0.1
+        -- Strict was replaced and became a synonym (for which we don't need any
+    -- lift instances) for Bang in GHC 8.0.1
        ''Bang,
        ''Overlap,
        ''SourceUnpackedness,
@@ -87,6 +99,8 @@ $(mapM deriveLift
 #else
        -- This is only for backwards compatibility with ghc 7.10.
        ''Strict,
+#endif
+#else
 #endif
        ''Callconv,
        ''Safety,

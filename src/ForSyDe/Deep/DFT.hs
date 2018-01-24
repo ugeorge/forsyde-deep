@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables, FlexibleContexts #-}
+{-# LANGUAGE ScopedTypeVariables, FlexibleContexts, MonoLocalBinds #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  ForSyDe.Deep.DFT

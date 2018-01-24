@@ -1,5 +1,5 @@
-{-# LANGUAGE TemplateHaskell, DeriveDataTypeable, MultiParamTypeClasses,
-             FunctionalDependencies, TypeSynonymInstances #-}  
+{-# LANGUAGE TemplateHaskell, DeriveDataTypeable, MultiParamTypeClasses, MonoLocalBinds,
+FunctionalDependencies, TypeSynonymInstances #-}  
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  ForSyDe.Bit
