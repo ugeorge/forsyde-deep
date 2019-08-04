@@ -242,6 +242,17 @@ fromBitVector32Id = unsafeVHDLBasicId "fromBitVector32"
 fixmul8Id :: VHDLId
 fixmul8Id = unsafeVHDLBasicId "fixmul8"
 
+-- | fixmul16 function identifier
+fixmul16Id :: VHDLId
+fixmul16Id = unsafeVHDLBasicId "fixmul16"
+
+-- | fixmul20 function identifier
+fixmul20Id :: VHDLId
+fixmul20Id = unsafeVHDLBasicId "fixmul20"
+
+-- | fixmul32 function identifier
+fixmul32Id :: VHDLId
+fixmul32Id = unsafeVHDLBasicId "fixmul32"
 
 
 -- | copy function identifier
@@ -298,6 +309,10 @@ int32TM :: TypeMark
 int32TM = unsafeVHDLBasicId "int32"
 
 -- | int32 typemark (defined in ForSyDe's VHDL library)
+int20TM :: TypeMark
+int20TM = unsafeVHDLBasicId "int20"
+
+-- | int32 typemark (defined in ForSyDe's VHDL library)
 int16TM :: TypeMark
 int16TM = unsafeVHDLBasicId "int16"
 
@@ -328,6 +343,9 @@ lowExpr = PrimLit "'0'"
 -- | \'1\' bit expression
 highExpr :: Expr
 highExpr = PrimLit "'1'"
+
+noExpr :: Expr -> Expr
+noExpr = id
 
 -- | tup string record suffix
 tupStrSuffix :: Int -> String

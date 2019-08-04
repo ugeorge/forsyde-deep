@@ -16,10 +16,14 @@
 module ForSyDe.Deep.Backend.VHDL.GlobalNameTable (globalNameTable) where
 
 import Data.Bits
+import Data.Complex
 import Language.Haskell.TH
 
 
 import ForSyDe.Deep.AbsentExt
+import ForSyDe.Deep.Complex
+import ForSyDe.Deep.Fixed
+import ForSyDe.Deep.Int
 import qualified ForSyDe.Deep.Bit as B (not)
 import ForSyDe.Deep.Bit hiding (not)
 import qualified ForSyDe.Deep.Backend.VHDL.AST as VHDL
@@ -66,6 +70,13 @@ globalNameTable = [
   ('div             , (2, genBinOpCall (:/:)                             ) ),
   ('mod             , (2, genBinOpCall Mod                               ) ),
   ('rem             , (2, genBinOpCall Rem                               ) ),
+  ('(:+)            , (2, genExprFCall2L (tupVHDLIdSuffix 2)             ) ),
+  -- ('(+:)            , (2, genCpxAdd                                      ) ),
+  -- ('(-:)            , (2, genCpxSub                                      ) ),
+  -- ('(*:)            , (2, genCpxMul                                      ) ),
+  ('F20             , (1, genUnOpCall id                                 ) ),
+  ('I16             , (1, genUnOpCall id                                 ) ),
+  ('I20             , (1, genUnOpCall id                                 ) ),
   ('(^)             , (2, genBinOpCall (:**:)                            ) ),
   ('(V.+>)          , (2, genExprFCall2L plusgtId                        ) ),
   ('(V.<+)          , (2, genExprFCall2L ltplusId                        ) ),
@@ -78,6 +89,9 @@ globalNameTable = [
   ('V.copy          , (2, genExprFCall2L copyId                          ) ),
   ('fromAbstExt     , (2, genExprFCall2L fromAbstExtId                   ) ),
   ('fixmul8         , (2, genExprFCall2L fixmul8Id                       ) ),
+  ('fixmul16        , (2, genExprFCall2L fixmul16Id                      ) ),
+  ('fixmul20        , (2, genExprFCall2L fixmul20Id                      ) ),
+  ('fixmul32        , (2, genExprFCall2L fixmul32Id                      ) ),
 -- unary functions
   ('B.not           , (1, genUnOpCall Not                                ) ),
   ('not             , (1, genUnOpCall Not                                ) ),
@@ -110,3 +124,20 @@ globalNameTable = [
  where genBinOpCall op = \[e1, e2] -> e1 `op` e2
        genUnOpCall op = \[e] -> op e
        genZeroConsCall cons = \[] -> cons
+       -----------------------------
+       genCpxMul [e1,e2] = let (x,y) = (cpxSel 1 e1, cpxSel 2 e1)
+                               (x',y') = (cpxSel 1 e2, cpxSel 2 e2)
+                           in tupExpr ((x:*:x'):-:(y:*:y'), ((x:*:y'):+:(y:*:x')))
+       genCpxAdd [e1,e2] = let (x,y) = (cpxSel 1 e1, cpxSel 2 e1)
+                               (x',y') = (cpxSel 1 e2, cpxSel 2 e2)
+                           in tupExpr ((x:+:x'), (y:+:y'))
+       genCpxSub [e1,e2] = let (x,y) = (cpxSel 1 e1, cpxSel 2 e1)
+                               (x',y') = (cpxSel 1 e2, cpxSel 2 e2)
+                           in tupExpr ((x:-:x'), (y:-:y'))
+
+tupExpr :: (Expr,Expr) -> Expr
+tupExpr (a,b) = genExprFCall2 (tupVHDLIdSuffix 2) a b
+
+cpxSel :: Int -> Expr -> Expr
+cpxSel n (PrimName id) = PrimName (NSelected (id :.: tupVHDLSuffix n))
+cpxSel _ e = error $ "cpxSel: " ++ show e

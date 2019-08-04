@@ -834,7 +834,7 @@ transExp2VHDL e | isConsOrFun   =
 
 
 
--- Literals
+-- Literalsx
 transExp2VHDL  (LitE (IntegerL integer))  = (return.transInteger2VHDL) integer
 transExp2VHDL  (LitE (IntPrimL integer))  = (return.transInteger2VHDL) integer
 

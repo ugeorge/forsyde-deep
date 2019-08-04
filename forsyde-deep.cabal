@@ -1,5 +1,5 @@
 name:           forsyde-deep
-version:        0.2.0
+version:        0.2.1
 cabal-version:  >= 1.9.2
 build-type:     Custom
 license:        BSD3
@@ -88,6 +88,10 @@ Library
                    ForSyDe.Deep.System,
                    ForSyDe.Deep.AbsentExt,
                    ForSyDe.Deep.Bit,
+                   ForSyDe.Deep.Int,
+                   ForSyDe.Deep.Fixed,
+                   ForSyDe.Deep.Complex,
+                   ForSyDe.Deep.Skeleton,
                    ForSyDe.Deep.DFT,
                    ForSyDe.Deep.FIR,
                    ForSyDe.Deep.Signal,

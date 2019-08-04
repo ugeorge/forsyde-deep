@@ -557,6 +557,10 @@ data Expr = -- Logical operations
             Expr :+: Expr     |
             Expr :-: Expr     |
             Expr :&: Expr     |
+            -- Complex Operators
+            Expr :+:: Expr     |
+            Expr :-:: Expr     |
+            Expr :*:: Expr     |
             -- Sign Operators
             Neg Expr          |
             Pos Expr          |
@@ -578,6 +582,8 @@ data Expr = -- Logical operations
             Aggregate [ElemAssoc]   -- (exp1,exp2,exp3, ...)
  deriving Show            
 
+
+
 -- operand precedences, according to the VHDL LRM: 
 --  "Where the language
 --   allows a sequence of operators, operators with the same
@@ -593,9 +599,9 @@ data Expr = -- Logical operations
 infixl 2 `And`, `Or`, `Xor`, `Nand`, `Nor`, `Xnor`
 infixl 3 :=:, :/=:, :<:, :<=:, :>:, :>=:
 infixl 4 `Sll`, `Srl`, `Sla`, `Sra`, `Rol`, `Ror`
-infixl 5 :+:, :-:, :&:
+infixl 5 :+:, :-:, :&:, :+::, :-::
 infix  6 `Neg`, `Pos`  
-infixl 7 :*:, :/:, `Mod`, `Rem`
+infixl 7 :*:, :/:, `Mod`, `Rem`, :*::
 infixl 8 :**:, `Abs`,  `Not` 
 
 -- | Logical Operators precedence

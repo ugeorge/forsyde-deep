@@ -461,6 +461,10 @@ pprExprPrec p e (e1 :*: e2) = pprExprPrecInfix p e multPrec e1 "*" e2
 pprExprPrec p e (e1 :/: e2) = pprExprPrecInfix p e multPrec e1 "/" e2
 pprExprPrec p e (Mod e1 e2) = pprExprPrecInfix p e multPrec e1 "mod" e2
 pprExprPrec p e (Rem e1 e2) = pprExprPrecInfix p e multPrec e1 "rem" e2
+-- Compex Operators
+pprExprPrec p e (e1 :+:: e2) = pprExprPrec p e (e1 :+:: e2)
+-- pprExprPrec p e (e1 :-: e2) = pprExprPrecInfix p e plusPrec e1 "-" e2
+-- pprExprPrec p e (e1 :&: e2) = pprExprPrecInfix p e plusPrec e1 "&" e2
 -- Miscellaneous Operators
 pprExprPrec p e (e1 :**: e2) = pprExprPrecInfix p e miscPrec e1 "**" e2
 pprExprPrec p _ (Abs e) = pprExprPrecPrefix p signPrec "abs" e 

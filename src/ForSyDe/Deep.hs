@@ -21,6 +21,8 @@ module ForSyDe.Deep
  module ForSyDe.Deep.Process,
  module ForSyDe.Deep.Backend,
  module ForSyDe.Deep.Bit,
+ module ForSyDe.Deep.Fixed,
+ module ForSyDe.Deep.Complex,
  module ForSyDe.Deep.AbsentExt,
  module ForSyDe.Deep.DFT,
  module ForSyDe.Deep.FIR,
@@ -29,6 +31,9 @@ module ForSyDe.Deep
 import ForSyDe.Deep.Ids
 import ForSyDe.Deep.Signal (Signal)
 import ForSyDe.Deep.Bit
+import ForSyDe.Deep.Fixed
+import ForSyDe.Deep.Complex
+import ForSyDe.Deep.Skeleton
 import ForSyDe.Deep.Process
 import ForSyDe.Deep.System
 import ForSyDe.Deep.Backend
