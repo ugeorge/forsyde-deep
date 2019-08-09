@@ -42,6 +42,7 @@ import qualified Data.Param.FSVec as V
 --                                               translated to VHDL   ))
 globalNameTable :: [(Name, (Int, [VHDL.Expr] -> VHDL.Expr ) )]
 globalNameTable = [
+  ('(:+)            , (2, genExprFCall2L noId                            ) ),
 -- Unary constructors
   ('Prst            , (1, genExprFCall1L presentId                       ) ),
 -- Constant constructors
@@ -70,13 +71,12 @@ globalNameTable = [
   ('div             , (2, genBinOpCall (:/:)                             ) ),
   ('mod             , (2, genBinOpCall Mod                               ) ),
   ('rem             , (2, genBinOpCall Rem                               ) ),
-  ('(:+)            , (2, genExprFCall2L (tupVHDLIdSuffix 2)             ) ),
   -- ('(+:)            , (2, genCpxAdd                                      ) ),
   -- ('(-:)            , (2, genCpxSub                                      ) ),
   -- ('(*:)            , (2, genCpxMul                                      ) ),
-  ('F20             , (1, genUnOpCall id                                 ) ),
-  ('I16             , (1, genUnOpCall id                                 ) ),
-  ('I20             , (1, genUnOpCall id                                 ) ),
+  ('F20             , (1, genUnOpCall noExpr                             ) ),
+  ('I16             , (1, genUnOpCall noExpr                             ) ),
+  ('I20             , (1, genUnOpCall noExpr                             ) ),
   ('(^)             , (2, genBinOpCall (:**:)                            ) ),
   ('(V.+>)          , (2, genExprFCall2L plusgtId                        ) ),
   ('(V.<+)          , (2, genExprFCall2L ltplusId                        ) ),

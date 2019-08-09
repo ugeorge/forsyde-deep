@@ -358,3 +358,6 @@ tupVHDLIdSuffix = unsafeVHDLBasicId . tupStrSuffix
 -- | tup VHDLName suffix
 tupVHDLSuffix :: Int -> Suffix
 tupVHDLSuffix = SSimple . tupVHDLIdSuffix
+
+noId :: VHDLId
+noId = unsafeVHDLBasicId ""

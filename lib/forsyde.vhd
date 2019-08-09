@@ -10,20 +10,15 @@ package types is
 -- Commented out due to representation overflow (modelsim integers
 -- are 32bits long)
 -- subtype int64 is integer range -(2**(64-1)) to +(2**(64-1)-1);  
-
 -- Commented out due to a overflow in 2**32:
 -- subtype int32 is integer range -(2**(32-1)) to +(2**(32-1)-1);  
-
 -- Note the lower bound is not -2147483648 because the LRM doesn't
 -- force to include it.
   subtype int32 is integer range -2147483647 to +2147483647;  
-
   subtype int20 is integer range -(2**(20-1)) to +(2**(20-1)-1);  
   
   subtype int16 is integer range -(2**(16-1)) to +(2**(16-1)-1);  
-
   subtype int8 is integer range -(2**(8-1)) to +(2**(8-1)-1);
-
   function default return std_logic;
   function show (s : std_logic) return string;
   
@@ -33,28 +28,25 @@ package types is
   -- Indexes for unconstrained fsvecs:
   --  -1 is used to express the null vector, with bounds (0 to -1)
   subtype fsvec_index is integer range -1 to integer'high;
-
   -- Unconstrained translation of "FSVec _ Bit"
   -- needed for toBitVector and fromBitVector
   type fsvec_std_logic is array (fsvec_index range <>) of std_logic;
-
   function toBitVector8 (i : int8)  return fsvec_std_logic; 
   function toBitVector16 (i : int16) return fsvec_std_logic;
+  function toBitVector20 (i : int20) return fsvec_std_logic;
   function toBitVector32 (i : int32) return fsvec_std_logic;
-
+  
   function fromBitVector8 (v : fsvec_std_logic) return int8; 
   function fromBitVector16 (v : fsvec_std_logic) return int16;
+  function fromBitVector20 (v : fsvec_std_logic) return int20;
   function fromBitVector32 (v : fsvec_std_logic) return int32;
-
   function fixmul8 (a : int8; b: int8) return int8;
   function fixmul16 (a : int16; b: int16) return int16;
   function fixmul20 (a : int20; b: int20) return int20;
   --function fixmul32 (a : int32; b: int32) return int32;
   
 end types;
-
 package body types is
-
 -- Commented out due to representation overflow 
 --  function default return int64 is
 --  begin 
@@ -72,7 +64,6 @@ package body types is
         result_signed := to_signed (res, 16);
         return to_integer(result_signed (8 to 15));
   end fixmul8;
-
   function fixmul16 (a : int16; b: int16) return int16 is
     variable res : int32;
     variable a32 : int32;
@@ -85,33 +76,30 @@ package body types is
         result_signed := to_signed (res, 32);
         return to_integer(result_signed (16 to 31));
   end fixmul16;
-
+  
   function fixmul20 (a : int20; b: int20) return int20 is
-    variable res : std_logic_vector(39 downto 0);
-    variable a20 : std_logic_vector(19 downto 0);
-    variable b20 : std_logic_vector(19 downto 0);
+    variable res : signed(39 downto 0);
+    variable a20 : signed(19 downto 0);
+    variable b20 : signed(19 downto 0);
   begin
-    a20 := toBitVector20(a);
-    b20 := toBitVector20(b);
-    res := signed(a20) * signed(b20);
-    return fromBitVector20(res(39 downto 20));
+    a20 := to_signed(a, a20'length);
+    b20 := to_signed(b, b20'length);
+    res := a20 * b20;
+    return to_integer(res(39 downto 20));
   end fixmul20;
   
   function default return integer is
   begin 
    return 0;
   end default;
-
   function show (i : integer) return string is
   begin
     return integer'image(i);
   end show;
-
   function default return std_logic is
   begin
    return '0';
   end default;
-
   function show (s : std_logic) return string is
   begin
     if s = '1' then
@@ -120,13 +108,11 @@ package body types is
       return "L";
     end if;
   end show;
-
   
   function default return boolean is
   begin
    return true;
   end default;
-
   function show (b : boolean) return string is
   begin
     if b then
@@ -135,7 +121,6 @@ package body types is
       return "False";
     end if;
   end show;
-
   function toBitVector8 (i : int8) return fsvec_std_logic is
     variable inter : signed (0 to 7) := to_signed (i, 8);
     variable ret : fsvec_std_logic (0 to 7); 
@@ -145,8 +130,6 @@ package body types is
     end loop;
     return ret;
   end toBitVector8;
-
-
   function toBitVector16 (i : int16) return fsvec_std_logic is
     variable inter : signed (0 to 15) := to_signed (i, 16);
     variable ret : fsvec_std_logic (0 to 15); 
@@ -156,7 +139,6 @@ package body types is
     end loop;
     return ret;
   end toBitVector16;
-
   function toBitVector20 (i : int20) return fsvec_std_logic is
     variable inter : signed (0 to 19) := to_signed (i, 20);
     variable ret : fsvec_std_logic (0 to 19); 
@@ -166,8 +148,6 @@ package body types is
     end loop;
     return ret;
   end toBitVector20;
-
-
   function toBitVector32 (i : int32) return fsvec_std_logic is
     variable inter : signed (0 to 31) := to_signed (i, 32);
     variable ret : fsvec_std_logic (0 to 31); 
@@ -177,8 +157,6 @@ package body types is
     end loop;
     return ret;
   end toBitVector32;
-
-
   function fromBitVector8 (v : fsvec_std_logic) return int8 is
     variable inter : signed (0 to 7);
   begin
@@ -187,7 +165,6 @@ package body types is
     end loop;
     return to_integer(inter);
   end frombitVector8;
-
   function fromBitVector16 (v : fsvec_std_logic) return int16 is
     variable inter : signed (0 to 15);
   begin
@@ -196,7 +173,6 @@ package body types is
     end loop;
     return to_integer(inter);
   end frombitVector16;
-
   function fromBitVector20 (v : fsvec_std_logic) return int20 is
     variable inter : signed (0 to 19);
   begin
@@ -205,7 +181,6 @@ package body types is
     end loop;
     return to_integer(inter);
   end frombitVector20;
-
   function fromBitVector32 (v : fsvec_std_logic) return int32 is
     variable inter : signed (0 to 31);
   begin
@@ -215,5 +190,4 @@ package body types is
     return to_integer(inter);
   end frombitVector32;
   
-
 end types;

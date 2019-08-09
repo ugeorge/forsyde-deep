@@ -369,6 +369,26 @@ customTR2TM rep = do
 -- | Really do the translation (customTR2TM deals with caching)
 doCustomTR2TM :: FSDTypeRep -> VHDLM (Either TypeDec SubtypeDec)
 
+-- | Tuple?
+doCustomTR2TM rep | isTuple = do
+  -- Create the elements of the record
+  fieldTMs <- mapM transTR2TM args
+  let elems = zipWith (\fieldId fieldTM -> ElementDec fieldId fieldTM )
+                      [tupVHDLIdSuffix n | n <- [1..]] fieldTMs
+  -- Create the Type Declaration identifier
+      recordId = unsafeVHDLContainerId fieldTMs $
+              (tupStrSuffix $ length fieldTMs) ++ "_" ++
+              (concatMap fromVHDLId.intersperse (unsafeVHDLBasicId "_")) fieldTMs
+  -- Add the default functions for the tuple type to the global results
+      funs = genTupleFuns fieldTMs recordId
+  mapM_ addSubProgBody funs
+  -- Create the record
+  return $ Left $ (TypeDec recordId (TDR $ RecordTypeDef elems))
+ where (cons, args) = fsdSplitTyConApp rep
+       conStr = fsdTyConName cons
+       isTuple = (length conStr > 2) && (all (==',') (reverse.tail.reverse.tail $ conStr))
+
+
 -- | FSVec?
 --   FSVecs are translated to subtypes of unconstrained vectors.
 --   All FSVec operations are translated as operations for the
@@ -408,25 +428,6 @@ doCustomTR2TM rep | isFSVec = do
          isFSVec = cons == fSVecTyCon
          size = transTLNat2Int sizeType
 
-
--- | Tuple?
-doCustomTR2TM rep | isTuple = do
-  -- Create the elements of the record
-  fieldTMs <- mapM transTR2TM args
-  let elems = zipWith (\fieldId fieldTM -> ElementDec fieldId fieldTM )
-                      [tupVHDLIdSuffix n | n <- [1..]] fieldTMs
-  -- Create the Type Declaration identifier
-      recordId = unsafeVHDLContainerId fieldTMs $
-              (tupStrSuffix $ length fieldTMs) ++ "_" ++
-              (concatMap fromVHDLId.intersperse (unsafeVHDLBasicId "_")) fieldTMs
-  -- Add the default functions for the tuple type to the global results
-      funs = genTupleFuns fieldTMs recordId
-  mapM_ addSubProgBody funs
-  -- Create the record
-  return $ Left $ (TypeDec recordId (TDR $ RecordTypeDef elems))
- where (cons, args) = fsdSplitTyConApp rep
-       conStr = fsdTyConName cons
-       isTuple = (length conStr > 2) && (all (==',') (reverse.tail.reverse.tail $ conStr))
 
 
 -- | AbstExt?
@@ -680,11 +681,22 @@ preparePatNameSpace prefix (AsP name pat) = do
 -- wildcard pattern
 preparePatNameSpace _ WildP = return ()
 
+-- Complex pattern
+-- Exception: InfixP (VarP x_6989586621679111788) Data.Complex.:+ (VarP y_6989586621679111789)
+
+-- complex number pattern as infix ONLY
+preparePatNameSpace prefix (InfixP a op b)
+  | isCpx op = do
+      let prepTup n = preparePatNameSpace (NSelected (prefix :.: tupVHDLSuffix n))
+      zipWithM_ prepTup [1..] [a,b]
+  where isCpx name = name == '(:+)
+
 -- tuple pattern
 preparePatNameSpace prefix (TupP pats) = do
   let prepTup n pat = preparePatNameSpace
                           (NSelected (prefix :.: tupVHDLSuffix n)) pat
   zipWithM_ prepTup [1..] pats
+
 
 -- AbstExt patterns
 
@@ -698,15 +710,6 @@ preparePatNameSpace prefix (ConP name ~[pat]) | isAbstExt name =
  where isAbstExt name = isPrst || name == 'Abst
        isPrst =  name == 'Prst
 
--- Complex pattern
--- Exception: InfixP (VarP x_6989586621679111788) Data.Complex.:+ (VarP y_6989586621679111789)
-
--- complex number pattern as infix ONLY
-preparePatNameSpace prefix (InfixP a op b)
-  | isCpx op = do
-      let prepTup n = preparePatNameSpace (NSelected (prefix :.: tupVHDLSuffix n))
-      zipWithM_ prepTup [1..] [a,b]
-  where isCpx name = name == '(:+)
 -- as prefix
   
 -- Unary Constructor patterns
@@ -832,7 +835,10 @@ transExp2VHDL e | isConsOrFun   =
        getName (ConE n) = Just n
        getName _        = Nothing
 
-
+-- Infix expressions
+--  InfixE (Just (InfixE (Just (VarE x_6989586621679111786)) (VarE GHC.Num.+) (Just (VarE x'_6989586621679111788)))) (ConE Data.Complex.:+) (Just (InfixE (Just (VarE y_6989586621679111787)) (VarE GHC.Num.+) (Just (VarE y'_6989586621679111789))))
+transExp2VHDL (InfixE (Just argl) f@(VarE _) (Just argr)) =
+ transExp2VHDL $ f `AppE` argl `AppE` argr
 
 -- Literals
 transExp2VHDL  (LitE (IntegerL integer))  = (return.transInteger2VHDL) integer
@@ -840,11 +846,6 @@ transExp2VHDL  (LitE (IntPrimL integer))  = (return.transInteger2VHDL) integer
 
 -- Unsupported literal
 transExp2VHDL lit@(LitE _) = expErr lit $ UnsupportedLiteral
-
--- Infix expressions
---  InfixE (Just (InfixE (Just (VarE x_6989586621679111786)) (VarE GHC.Num.+) (Just (VarE x'_6989586621679111788)))) (ConE Data.Complex.:+) (Just (InfixE (Just (VarE y_6989586621679111787)) (VarE GHC.Num.+) (Just (VarE y'_6989586621679111789))))
-transExp2VHDL (InfixE (Just argl) f@(VarE _) (Just argr)) =
- transExp2VHDL $ f `AppE` argl `AppE` argr
 
 -- Infix constructors
 transExp2VHDL e@(InfixE (Just argl) f@(ConE name) (Just argr)) =

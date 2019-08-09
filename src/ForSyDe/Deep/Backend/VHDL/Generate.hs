@@ -69,9 +69,9 @@ genLibDesignFile  (GlobalTravResult typeDecs subtypeDecs subProgBodies) =
  -- unconstrained types (which may have constarined types depending on),
  -- then subtypes (which we may have composite types depending on)
  -- A general solution could be a type dependency resolving algorithm
- where packageDec = PackageDec typesId (packageUnconsTypeDecs ++
+ where packageDec = PackageDec typesId (packageTypeDecs ++
+                                        packageUnconsTypeDecs ++
                                         packageSubtypeDecs ++
-                                        packageTypeDecs ++
                                         subProgSpecs)
        packageUnconsTypeDecs = map PDITD $ filter (\a -> isUnconsType a) typeDecs
        packageTypeDecs = map PDITD $ filter (\a -> (not.isUnconsType) a) typeDecs
